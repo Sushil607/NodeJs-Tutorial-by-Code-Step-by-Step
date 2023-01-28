@@ -1,21 +1,55 @@
-const mysql = require("mysql");
+const express = require("express");
+const { response } = require("express/lib/express.js");
+const con = require("./config.js");
 
-const con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "1234",
-  database: "myhiber",
+const app = express();
+
+app.use(express.json());
+
+app.get("/students", (req, res) => {
+  con.query("select * from student", (err, students) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(students);
+    }
+  });
 });
 
-// Checking if it is connected
-con.connect((err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("Connected to db...");
-  }
+app.post("/students", (req, res) => {
+  const newStudent = req.body;
+  con.query("insert into student SET ?", newStudent, (err, result, fields) => {
+    if (err) throw err;
+    res.send(result);
+  });
 });
 
-con.query("select * from student", (err, data) => {
-  console.log(data);
+app.put("/students/:id", (req, res) => {
+  const data = [
+    req.body.name,
+    req.body.duration,
+    req.body.course,
+    req.body.city,
+    req.params.id,
+  ];
+  con.query(
+    "update student SET  name=?,duration=?,course=?, city=? where id = ?",
+    data,
+    (err, result, fields) => {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+});
+
+app.delete("/students/:id", (req, res) => {
+  const id = req.params.id;
+  con.query(`delete from student WHERE id = ${id}`, (err, result, fields) => {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+app.listen(3000, () => {
+  console.log("Server is listening on PORT : 3000 ...");
 });
