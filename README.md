@@ -2,4 +2,4 @@
 
 ## From Basics to advanced
 
-### All topics covered
+### All topics covered completely
